@@ -1,5 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const AppError = require('./utils/appError.utils');
 const globalErrorHandler = require('./controllers/error.controller');
@@ -8,16 +10,31 @@ const userRouter = require('./routes/users.router');
 
 const app = express();
 
-// MIDDLEWARES
+// ---- GLOBAL MIDDLEWARES ----
 
+// Security HTTP Headers
+app.use(helmet());
+
+// Logger - only during development
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.use(express.json());
-// app.use(express.static(`${__dirname}/public`));
+// Limit HTTP requests
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP. Please try again in an hour!',
+});
+app.use('/api', limiter);
 
-// ROUTES
+// Body Parser - reading data from body into req.body
+app.use(express.json({ limit: '10kb' }));
+
+// Serving static files
+app.use(express.static(`${__dirname}/public`));
+
+// ---- ROUTES ----
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
