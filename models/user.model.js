@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 // MIDDLEWARES
@@ -64,6 +69,12 @@ userSchema.pre('save', function (next) {
   // Modify passwordChangedAt property
   // Subtracting 1000ms because sometimes it takes longer to save a document and the JWT is issued earlier.  This prevents users to login with the new token as JWTTokenIssuedTime < PasswordChangedTime
   this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+userSchema.pre(/^find/, function (next) {
+  // 'this' point to the current query
+  this.find({ active: { $ne: false } });
   next();
 });
 
