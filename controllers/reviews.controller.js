@@ -11,8 +11,11 @@ exports.setTourUserIds = (req, res, next) => {
 
 exports.checkIfUserIsAuthor = async (req, res, next) => {
   const review = await Review.findById(req.params.id);
+
   if (req.user.role !== 'admin' && review.user.id !== req.user.id)
     return next(new AppError(`You cannot edit someone's else review`, 403));
+
+  next();
 };
 
 exports.getAllReviews = handlerFactory.getAll(Review);
