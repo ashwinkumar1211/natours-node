@@ -37,7 +37,7 @@ const createAndSendToken = (user, statusCode, res) => {
   });
 };
 
-const signUp = catchAsync(async (req, res, next) => {
+exports.signUp = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
@@ -48,7 +48,7 @@ const signUp = catchAsync(async (req, res, next) => {
   createAndSendToken(newUser, 201, res);
 });
 
-const login = catchAsync(async (req, res, next) => {
+exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   // 1) Check if email and password exist in the payload
@@ -67,7 +67,7 @@ const login = catchAsync(async (req, res, next) => {
   createAndSendToken(user, 200, res);
 });
 
-const protect = catchAsync(async (req, res, next) => {
+exports.protect = catchAsync(async (req, res, next) => {
   // 1) Get JWT and check if it exists
   let token;
   if (
@@ -107,7 +107,7 @@ const protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-const restrictTo = (...roles) =>
+exports.restrictTo = (...roles) =>
   catchAsync(async (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
@@ -118,7 +118,7 @@ const restrictTo = (...roles) =>
     next();
   });
 
-const forgotPassword = catchAsync(async (req, res, next) => {
+exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
 
@@ -163,7 +163,7 @@ const forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
-const resetPassword = catchAsync(async (req, res, next) => {
+exports.resetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on token
   const hashedToken = crypto
     .createHash('sha256')
@@ -196,7 +196,7 @@ const resetPassword = catchAsync(async (req, res, next) => {
   createAndSendToken(user, 200, res);
 });
 
-const updatePassword = catchAsync(async (req, res, next) => {
+exports.updatePassword = catchAsync(async (req, res, next) => {
   // 1) Get user from the collection
   const user = await User.findById(req.user.id).select('+password');
 
@@ -213,13 +213,3 @@ const updatePassword = catchAsync(async (req, res, next) => {
   // 4) Log user in. send JWT
   createAndSendToken(user, 200, res);
 });
-
-module.exports = {
-  signUp,
-  login,
-  protect,
-  restrictTo,
-  forgotPassword,
-  resetPassword,
-  updatePassword,
-};

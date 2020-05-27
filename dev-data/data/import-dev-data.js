@@ -49,4 +49,7 @@ if (process.argv[2] === '--import') {
   importData();
 } else if (process.argv[2] === '--delete') {
   deleteData();
+} else {
+  console.log('Invalid option! Try --import or --delete.');
+  process.exit();
 }
