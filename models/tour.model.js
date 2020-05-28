@@ -115,6 +115,7 @@ const tourSchema = new mongoose.Schema(
 // INDEXES
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
 
 // VIRTUAL PROPERTIES
 tourSchema.virtual('durationWeeks').get(function () {
@@ -160,7 +161,10 @@ tourSchema.post(/^find/, function (docs, next) {
 
 // AGGREGATION MIDDLEWARE
 tourSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  // You can only use $geoNear (tourController.getDistances) as the first stage of a pipeline.
+  // this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+
+  this.pipeline().push({ $match: { secretTour: { $ne: true } } });
   next();
 });
 
