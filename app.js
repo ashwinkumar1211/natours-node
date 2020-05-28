@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -12,10 +13,17 @@ const globalErrorHandler = require('./controllers/error.controller');
 const tourRouter = require('./routes/tours.router');
 const userRouter = require('./routes/users.router');
 const reviewRouter = require('./routes/reviews.router');
+const viewRouter = require('./routes/views.router');
 
 const app = express();
 
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
 // ---- GLOBAL MIDDLEWARES ----
+
+// Serving static files
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Security HTTP Headers
 app.use(helmet());
@@ -56,15 +64,17 @@ app.use(
   })
 );
 
-// Serving static files
-app.use(express.static(`${__dirname}/public`));
-
 // ---- ROUTES ----
 
+// View Routes
+app.use('/', viewRouter);
+
+// API Routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 
+// Undefined (404) routes
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
