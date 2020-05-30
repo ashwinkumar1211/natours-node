@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
 
 const AppError = require('./utils/appError.utils');
 const globalErrorHandler = require('./controllers/error.controller');
@@ -44,6 +45,9 @@ app.use('/api', limiter);
 // Body Parser - reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
 
+// Cookie Parser
+app.use(cookieParser());
+
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
 
@@ -64,15 +68,22 @@ app.use(
   })
 );
 
-// ---- ROUTES ----
+// Test middleware
+// app.use((req, res, next) => {
+//   req.requestTime = new Date().toISOString();
+//   console.log(req.cookies);
+//   next();
+// });
 
-// View Routes
-app.use('/', viewRouter);
+// ---- ROUTES ----
 
 // API Routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+
+// View Routes
+app.use('/', viewRouter);
 
 // Undefined (404) routes
 app.all('*', (req, res, next) => {
