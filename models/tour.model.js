@@ -154,10 +154,10 @@ tourSchema.pre(/^find/, function (next) {
 });
 
 // Logging the time taken to preform the query
-tourSchema.post(/^find/, function (docs, next) {
-  console.log(`Query took ${Date.now() - this.start} ms`);
-  next();
-});
+// tourSchema.post(/^find/, function (docs, next) {
+//   console.log(`Query took ${Date.now() - this.start} ms`);
+//   next();
+// });
 
 // AGGREGATION MIDDLEWARE
 tourSchema.pre('aggregate', function (next) {
