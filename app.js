@@ -19,6 +19,8 @@ const reviewRouter = require('./routes/reviews.router');
 const bookingRouter = require('./routes/bookings.router');
 const viewRouter = require('./routes/views.router');
 
+const bookingController = require('./controllers/booking.controller');
+
 const app = express();
 
 // Make app trust proxies
@@ -51,6 +53,13 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP. Please try again in an hour!',
 });
 app.use('/api', limiter);
+
+// Stripe needs the body in a raw form (not in JSON)
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout
+);
 
 // Body Parser - reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
